@@ -1,0 +1,889 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+const _ink = Color(0xFF181713);
+const _panel = Color(0xFF22211D);
+const _gold = Color(0xFFD5AD68);
+const _muted = Color(0xFFAAA59A);
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const DndCompanionApp());
+}
+
+class Spell {
+  const Spell({
+    required this.name,
+    required this.level,
+    required this.school,
+    required this.castingTime,
+    required this.range,
+    required this.target,
+    required this.duration,
+    required this.save,
+    required this.spellResistance,
+    required this.classes,
+  });
+
+  factory Spell.fromRow(List<dynamic> row) => Spell(
+        name: row[0] as String,
+        level: row[1] as int,
+        school: row[2] as String,
+        castingTime: row[3] as String,
+        range: row[4] as String,
+        target: row[5] as String,
+        duration: row[6] as String,
+        save: row[7] as String,
+        spellResistance: row[8] as String,
+        classes: row[9] as String,
+      );
+
+  final String name;
+  final int level;
+  final String school;
+  final String castingTime;
+  final String range;
+  final String target;
+  final String duration;
+  final String save;
+  final String spellResistance;
+  final String classes;
+}
+
+class CharacterSheet {
+  CharacterSheet(this.values);
+
+  factory CharacterSheet.empty() => CharacterSheet({
+        for (final key in _fieldLabels.keys) key: '',
+        for (final key in _abilityLabels.keys) key: '',
+      });
+
+  factory CharacterSheet.fromJson(String source) {
+    final decoded = jsonDecode(source);
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('El archivo de la ficha no tiene un formato válido.');
+    }
+    return CharacterSheet({
+      for (final key in _fieldLabels.keys)
+        key: decoded[key] is String ? decoded[key] as String : '',
+      for (final key in _abilityLabels.keys)
+        key: decoded[key] is String ? decoded[key] as String : '',
+    });
+  }
+
+  final Map<String, String> values;
+
+  String operator [](String key) => values[key] ?? '';
+
+  String toJson() => jsonEncode(values);
+}
+
+const _fieldLabels = <String, String>{
+  'character': 'Nombre del personaje',
+  'player': 'Jugador',
+  'race': 'Raza',
+  'class': 'Clase y nivel',
+  'alignment': 'Alineamiento',
+  'deity': 'Deidad',
+  'size': 'Tamaño',
+  'age': 'Edad',
+  'height': 'Altura',
+  'weight': 'Peso',
+  'experience': 'Experiencia',
+  'hp': 'Puntos de golpe',
+  'initiative': 'Iniciativa',
+  'speed': 'Velocidad',
+  'armorClass': 'Clase de armadura',
+  'touch': 'Toque',
+  'flatFooted': 'Desprevenido',
+  'baseAttack': 'Ataque base',
+  'grapple': 'Agarre',
+  'fortitude': 'Fortaleza',
+  'reflex': 'Reflejos',
+  'will': 'Voluntad',
+  'skills': 'Habilidades y rangos',
+  'feats': 'Dotes',
+  'equipment': 'Equipo y tesoro',
+  'notes': 'Conjuros conocidos, preparados y notas',
+};
+
+const _abilityLabels = <String, String>{
+  'strength': 'Fuerza',
+  'dexterity': 'Destreza',
+  'constitution': 'Constitución',
+  'intelligence': 'Inteligencia',
+  'wisdom': 'Sabiduría',
+  'charisma': 'Carisma',
+};
+
+class DndCompanionApp extends StatefulWidget {
+  const DndCompanionApp({super.key});
+
+  @override
+  State<DndCompanionApp> createState() => _DndCompanionAppState();
+}
+
+class _DndCompanionAppState extends State<DndCompanionApp> {
+  late final Future<({List<Spell> spells, CharacterSheet sheet})> _startup =
+      _load();
+  int _selectedIndex = 0;
+
+  Future<({List<Spell> spells, CharacterSheet sheet})> _load() async {
+    final rawSpells =
+        await rootBundle.loadString('assets/data/spells.json');
+    final rows = jsonDecode(rawSpells);
+    if (rows is! List) {
+      throw const FormatException('El compendio local no tiene un formato válido.');
+    }
+    final spells = rows
+        .whereType<List<dynamic>>()
+        .map(Spell.fromRow)
+        .toList(growable: false);
+    final preferences = await SharedPreferences.getInstance();
+    final saved = preferences.getString('character-sheet-v1');
+    final sheet =
+        saved == null ? CharacterSheet.empty() : CharacterSheet.fromJson(saved);
+    return (spells: spells, sheet: sheet);
+  }
+
+  Future<void> _saveSheet(CharacterSheet sheet) async {
+    final preferences = await SharedPreferences.getInstance();
+    final saved = await preferences.setString('character-sheet-v1', sheet.toJson());
+    if (!saved) {
+      throw StateError('No fue posible guardar la ficha en este dispositivo.');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        title: 'Crónicas 3.5',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          brightness: Brightness.dark,
+          scaffoldBackgroundColor: _ink,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: _gold,
+            brightness: Brightness.dark,
+            surface: _panel,
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: _ink,
+            foregroundColor: Colors.white,
+            centerTitle: false,
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: const Color(0xFF292822),
+            labelStyle: const TextStyle(color: _muted),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF39372F)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: _gold),
+            ),
+          ),
+        ),
+        home: FutureBuilder(
+          future: _startup,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return _StartupError(message: snapshot.error.toString());
+            }
+            if (!snapshot.hasData) {
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(color: _gold),
+                ),
+              );
+            }
+            final data = snapshot.data!;
+            return _HomeShell(
+              spells: data.spells,
+              initialSheet: data.sheet,
+              selectedIndex: _selectedIndex,
+              onSelected: (index) => setState(() => _selectedIndex = index),
+              onSaveSheet: _saveSheet,
+            );
+          },
+        ),
+      );
+}
+
+class _StartupError extends StatelessWidget {
+  const _StartupError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No se pudo abrir la aplicación',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  SelectableText(message, textAlign: TextAlign.center),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Revisa que el compendio local esté incluido y que el almacenamiento del navegador esté habilitado.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: _muted),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+class _HomeShell extends StatelessWidget {
+  const _HomeShell({
+    required this.spells,
+    required this.initialSheet,
+    required this.selectedIndex,
+    required this.onSelected,
+    required this.onSaveSheet,
+  });
+
+  final List<Spell> spells;
+  final CharacterSheet initialSheet;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+  final Future<void> Function(CharacterSheet) onSaveSheet;
+
+  static const _destinations = [
+    NavigationDestination(
+      icon: Icon(Icons.badge_outlined),
+      selectedIcon: Icon(Icons.badge),
+      label: 'Personaje',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.auto_awesome_outlined),
+      selectedIcon: Icon(Icons.auto_awesome),
+      label: 'Conjuros',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth >= 760;
+          final views = [
+            _CharacterScreen(initialSheet: initialSheet, onSave: onSaveSheet),
+            _SpellbookScreen(spells: spells),
+          ];
+          return Scaffold(
+            appBar: AppBar(
+              title: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.shield_outlined, color: _gold),
+                  SizedBox(width: 10),
+                  Text('CRÓNICAS 3.5', style: TextStyle(letterSpacing: 1.6)),
+                ],
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 20),
+                  child: Center(
+                    child: Text(
+                      '${spells.length} CONJUROS',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        letterSpacing: 1,
+                        color: _muted,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            body: wide
+                ? Row(
+                    children: [
+                      NavigationRail(
+                        selectedIndex: selectedIndex,
+                        onDestinationSelected: onSelected,
+                        labelType: NavigationRailLabelType.all,
+                        backgroundColor: _ink,
+                        destinations: const [
+                          NavigationRailDestination(
+                            icon: Icon(Icons.badge_outlined),
+                            selectedIcon: Icon(Icons.badge),
+                            label: Text('Personaje'),
+                          ),
+                          NavigationRailDestination(
+                            icon: Icon(Icons.auto_awesome_outlined),
+                            selectedIcon: Icon(Icons.auto_awesome),
+                            label: Text('Conjuros'),
+                          ),
+                        ],
+                      ),
+                      const VerticalDivider(width: 1, color: Color(0xFF35332C)),
+                      Expanded(
+                        child: IndexedStack(
+                          index: selectedIndex,
+                          children: views,
+                        ),
+                      ),
+                    ],
+                  )
+                : IndexedStack(index: selectedIndex, children: views),
+            bottomNavigationBar: wide
+                ? null
+                : NavigationBar(
+                    selectedIndex: selectedIndex,
+                    onDestinationSelected: onSelected,
+                    destinations: _destinations,
+                  ),
+          );
+        },
+      );
+}
+
+class _CharacterScreen extends StatefulWidget {
+  const _CharacterScreen({required this.initialSheet, required this.onSave});
+
+  final CharacterSheet initialSheet;
+  final Future<void> Function(CharacterSheet) onSave;
+
+  @override
+  State<_CharacterScreen> createState() => _CharacterScreenState();
+}
+
+class _CharacterScreenState extends State<_CharacterScreen> {
+  Timer? _saveTimer;
+  late final Map<String, TextEditingController> _controllers = {
+    for (final key in {..._fieldLabels.keys, ..._abilityLabels.keys})
+      key: TextEditingController(text: widget.initialSheet[key]),
+  };
+  String? _saveError;
+
+  @override
+  void dispose() {
+    _saveTimer?.cancel();
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _updateSheet() {
+    final sheet = CharacterSheet({
+      for (final entry in _controllers.entries) entry.key: entry.value.text,
+    });
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(milliseconds: 300), () async {
+      try {
+        await widget.onSave(sheet);
+        if (mounted && _saveError != null) {
+          setState(() => _saveError = null);
+        }
+      } catch (error) {
+        if (mounted) setState(() => _saveError = error.toString());
+      }
+    });
+  }
+
+  Widget _field(String key, {int lines = 1}) => TextField(
+        controller: _controllers[key],
+        onChanged: (_) => _updateSheet(),
+        minLines: lines == 1 ? 1 : lines,
+        maxLines: lines,
+        decoration: InputDecoration(
+          labelText: _fieldLabels[key],
+          alignLabelWithHint: lines > 1,
+        ),
+      );
+
+  Widget _section(String title, IconData icon, List<Widget> children) => Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: _panel,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFF39372F)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: _gold, size: 20),
+                const SizedBox(width: 9),
+                Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    color: _gold,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.25,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            ...children,
+          ],
+        ),
+      );
+
+  Widget _grid(List<Widget> fields, {double width = 180}) => LayoutBuilder(
+        builder: (context, constraints) => Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            for (final field in fields)
+              SizedBox(
+                width: constraints.maxWidth < width + 24
+                    ? constraints.maxWidth
+                    : width,
+                child: field,
+              ),
+          ],
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final content = [
+      _section('Identidad', Icons.person_outline, [
+        _grid([
+          _field('character'),
+          _field('player'),
+          _field('race'),
+          _field('class'),
+          _field('alignment'),
+          _field('deity'),
+          _field('size'),
+          _field('age'),
+          _field('height'),
+          _field('weight'),
+          _field('experience'),
+        ]),
+      ]),
+      _section('Características', Icons.bolt_outlined, [
+        _grid([
+          for (final entry in _abilityLabels.entries)
+            TextField(
+              controller: _controllers[entry.key],
+              onChanged: (_) => _updateSheet(),
+              keyboardType: const TextInputType.numberWithOptions(
+                signed: true,
+                decimal: true,
+              ),
+              decoration: InputDecoration(labelText: entry.value),
+            ),
+        ], width: 140),
+        const SizedBox(height: 10),
+        const Text(
+          'Anota el valor de característica o su modificador.',
+          style: TextStyle(color: _muted, fontSize: 12),
+        ),
+      ]),
+      _section('Combate y defensas', Icons.shield_outlined, [
+        _grid([
+          _field('hp'),
+          _field('initiative'),
+          _field('speed'),
+          _field('armorClass'),
+          _field('touch'),
+          _field('flatFooted'),
+          _field('baseAttack'),
+          _field('grapple'),
+          _field('fortitude'),
+          _field('reflex'),
+          _field('will'),
+        ]),
+      ]),
+      _section('Aventurero', Icons.backpack_outlined, [
+        _field('skills', lines: 3),
+        const SizedBox(height: 12),
+        _field('feats', lines: 3),
+        const SizedBox(height: 12),
+        _field('equipment', lines: 3),
+        const SizedBox(height: 12),
+        _field('notes', lines: 4),
+      ]),
+    ];
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 32),
+      children: [
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1040),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Tu próxima leyenda empieza aquí.',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Completa tu hoja; los cambios se guardan en este dispositivo.',
+                  style: TextStyle(color: _muted),
+                ),
+                if (_saveError != null) ...[
+                  const SizedBox(height: 12),
+                  Text('Error al guardar: $_saveError',
+                      style: const TextStyle(color: Colors.redAccent)),
+                ],
+                const SizedBox(height: 22),
+                for (var i = 0; i < content.length; i++) ...[
+                  content[i],
+                  if (i < content.length - 1) const SizedBox(height: 16),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SpellbookScreen extends StatefulWidget {
+  const _SpellbookScreen({required this.spells});
+
+  final List<Spell> spells;
+
+  @override
+  State<_SpellbookScreen> createState() => _SpellbookScreenState();
+}
+
+class _SpellbookScreenState extends State<_SpellbookScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
+  int? _level;
+  String? _className;
+
+  static const _classNames = [
+    'Mago',
+    'Hechicero',
+    'Clérigo',
+    'Druida',
+    'Bardo',
+    'Paladín',
+    'Explorador',
+  ];
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<Spell> get _filtered => widget.spells.where((spell) {
+        final text =
+            '${spell.name} ${spell.school} ${spell.classes}'.toLowerCase();
+        return text.contains(_query.toLowerCase()) &&
+            (_level == null || spell.level == _level) &&
+            (_className == null || spell.classes.contains(_className!));
+      }).toList(growable: false);
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final wide = constraints.maxWidth > 700;
+          final spells = _filtered;
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 32),
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1040),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Compendio de conjuros',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Busca por nombre, escuela o clase y explora los detalles.',
+                        style: TextStyle(color: _muted),
+                      ),
+                      const SizedBox(height: 20),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          SizedBox(
+                            width: wide ? 420 : constraints.maxWidth,
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (value) =>
+                                  setState(() => _query = value.trim()),
+                              decoration: InputDecoration(
+                                labelText: 'Buscar conjuros',
+                                prefixIcon: const Icon(Icons.search),
+                                suffixIcon: _query.isEmpty
+                                    ? null
+                                    : IconButton(
+                                        tooltip: 'Limpiar búsqueda',
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          setState(() => _query = '');
+                                        },
+                                        icon: const Icon(Icons.close),
+                                      ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: wide ? 180 : constraints.maxWidth,
+                            child: DropdownButtonFormField<int?>(
+                              value: _level,
+                              decoration: const InputDecoration(
+                                labelText: 'Nivel',
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 14,
+                                ),
+                              ),
+                              items: [
+                                const DropdownMenuItem<int?>(
+                                  value: null,
+                                  child: Text('Todos los niveles'),
+                                ),
+                                for (var level = 0; level <= 9; level++)
+                                  DropdownMenuItem<int?>(
+                                    value: level,
+                                    child: Text('Nivel $level'),
+                                  ),
+                              ],
+                              onChanged: (value) =>
+                                  setState(() => _level = value),
+                            ),
+                          ),
+                          SizedBox(
+                            width: wide ? 200 : constraints.maxWidth,
+                            child: DropdownButtonFormField<String?>(
+                              value: _className,
+                              decoration: const InputDecoration(
+                                labelText: 'Clase',
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 14,
+                                ),
+                              ),
+                              items: [
+                                const DropdownMenuItem<String?>(
+                                  value: null,
+                                  child: Text('Todas las clases'),
+                                ),
+                                for (final name in _classNames)
+                                  DropdownMenuItem<String?>(
+                                    value: name,
+                                    child: Text(name),
+                                  ),
+                              ],
+                              onChanged: (value) =>
+                                  setState(() => _className = value),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        '${spells.length} de ${widget.spells.length} conjuros',
+                        style: const TextStyle(color: _muted, fontSize: 12),
+                      ),
+                      const SizedBox(height: 10),
+                      if (spells.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 40),
+                          child: Center(
+                            child: Text(
+                              'No hay conjuros que coincidan con esos filtros.',
+                              style: TextStyle(color: _muted),
+                            ),
+                          ),
+                        )
+                      else
+                        for (final spell in spells)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: _SpellCard(
+                              spell: spell,
+                              onTap: () => showDialog<void>(
+                                context: context,
+                                builder: (context) =>
+                                    _SpellDetailsDialog(spell: spell),
+                              ),
+                            ),
+                          ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+}
+
+class _SpellCard extends StatelessWidget {
+  const _SpellCard({required this.spell, required this.onTap});
+
+  final Spell spell;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Card(
+        color: _panel,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: Color(0xFF39372F)),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF393126),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${spell.level}',
+                    style: const TextStyle(
+                      color: _gold,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        spell.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${spell.school} · ${spell.classes}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: _muted, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.chevron_right, color: _muted),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+class _SpellDetailsDialog extends StatelessWidget {
+  const _SpellDetailsDialog({required this.spell});
+
+  final Spell spell;
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+        backgroundColor: _panel,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF393126),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '${spell.level}',
+                style: const TextStyle(color: _gold),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(spell.name)),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _detail('Escuela', spell.school),
+              _detail('Tiempo de lanzamiento', spell.castingTime),
+              _detail('Alcance', spell.range),
+              _detail('Objetivo / área / efecto', spell.target),
+              _detail('Duración', spell.duration),
+              _detail('Tiro de salvación', spell.save),
+              _detail('Resistencia a conjuros', spell.spellResistance),
+              _detail('Clases', spell.classes),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      );
+
+  Widget _detail(String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 145,
+              child: Text(
+                label,
+                style: const TextStyle(color: _muted, fontSize: 13),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+      );
+}
