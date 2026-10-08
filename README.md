@@ -5,7 +5,7 @@ Aplicación Flutter para Android y web con una ficha editable de personaje de D&
 ## Requisitos
 
 - Flutter estable (incluye Dart) instalado y agregado al `PATH`.
-- Para Android: Android Studio con Android SDK y las licencias del SDK aceptadas.
+- Para Android: Java 17, Android SDK (plataforma 36, Build Tools 36.0.0 y Platform Tools) y sus licencias aceptadas. Android Studio es opcional; es útil para administrar emuladores.
 - Para compilar para web: Chrome instalado para la vista previa local.
 
 Comprueba la instalación con:
@@ -14,16 +14,33 @@ Comprueba la instalación con:
 flutter doctor
 ```
 
-## Preparar las plataformas
-
-Desde la carpeta del proyecto, genera los archivos nativos de Android y web (se hace una sola vez):
+Si Flutter todavía indica que faltan licencias de Android, acepta las licencias e instala los paquetes de compilación:
 
 ```powershell
-flutter create --platforms=android,web .
+flutter doctor --android-licenses
+sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+```
+
+## Preparar las dependencias
+
+Las plataformas Android y web ya están configuradas en el proyecto. Desde su carpeta, descarga las dependencias de Dart y Flutter:
+
+```powershell
 flutter pub get
 ```
 
-Si `flutter create` solicita confirmar la sobrescritura de archivos del proyecto, conserva `lib/main.dart`, `pubspec.yaml` y `assets/data/spells.json`.
+Solo si eliminas las carpetas de las plataformas, puedes regenerarlas sin reemplazar el código de la app:
+
+```powershell
+flutter create --platforms=android,web .
+```
+
+Comprueba el análisis estático y ejecuta las pruebas con:
+
+```powershell
+flutter analyze
+flutter test
+```
 
 ## Ejecutar en Android
 
@@ -47,6 +64,11 @@ flutter build appbundle --release
 ```
 
 La firma de publicación debe configurarse en el proyecto Android antes de distribuir en Google Play.
+Con un dispositivo conectado y la depuración USB habilitada, también puedes instalar el APK compilado con:
+
+```powershell
+adb install -r build/app/outputs/flutter-apk/app-release.apk
+```
 
 ## Ver la aplicación en web
 
@@ -62,14 +84,13 @@ Para generar archivos web estáticos:
 flutter build web --release
 ```
 
-Sirve `build/web` con un servidor web estático. Por ejemplo, con Python:
+Para probar la app en un navegador sin abrir Chrome directamente:
 
 ```powershell
-cd build/web
-python -m http.server 8000
+flutter run -d web-server --web-hostname 127.0.0.1 --web-port 8000
 ```
 
-Luego abre `http://localhost:8000`. También puedes desplegar el contenido de `build/web` en cualquier hosting estático con HTTPS. La ficha se conserva en el almacenamiento local del navegador; borrar los datos del sitio la elimina.
+Abre `http://localhost:8000`. El contenido de `build/web` también puede publicarse en cualquier hosting estático con HTTPS. La ficha se conserva en el almacenamiento local del navegador; borrar los datos del sitio la elimina.
 
 ## Funciones
 

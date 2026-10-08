@@ -65,7 +65,9 @@ class CharacterSheet {
   factory CharacterSheet.fromJson(String source) {
     final decoded = jsonDecode(source);
     if (decoded is! Map<String, dynamic>) {
-      throw const FormatException('El archivo de la ficha no tiene un formato válido.');
+      throw const FormatException(
+        'El archivo de la ficha no tiene un formato válido.',
+      );
     }
     return CharacterSheet({
       for (final key in _fieldLabels.keys)
@@ -133,16 +135,21 @@ class _DndCompanionAppState extends State<DndCompanionApp> {
   int _selectedIndex = 0;
 
   Future<({List<Spell> spells, CharacterSheet sheet})> _load() async {
-    final rawSpells =
-        await rootBundle.loadString('assets/data/spells.json');
+    final rawSpells = await rootBundle.loadString('assets/data/spells.json');
     final rows = jsonDecode(rawSpells);
     if (rows is! List) {
-      throw const FormatException('El compendio local no tiene un formato válido.');
+      throw const FormatException(
+        'El compendio local no tiene un formato válido.',
+      );
     }
-    final spells = rows
-        .whereType<List<dynamic>>()
-        .map(Spell.fromRow)
-        .toList(growable: false);
+    final spells = rows.map((row) {
+      if (row is! List<dynamic> || row.length != 10) {
+        throw const FormatException(
+          'Un conjuro del compendio local no tiene los diez campos esperados.',
+        );
+      }
+      return Spell.fromRow(row);
+    }).toList(growable: false);
     final preferences = await SharedPreferences.getInstance();
     final saved = preferences.getString('character-sheet-v1');
     final sheet =
@@ -152,7 +159,10 @@ class _DndCompanionAppState extends State<DndCompanionApp> {
 
   Future<void> _saveSheet(CharacterSheet sheet) async {
     final preferences = await SharedPreferences.getInstance();
-    final saved = await preferences.setString('character-sheet-v1', sheet.toJson());
+    final saved = await preferences.setString(
+      'character-sheet-v1',
+      sheet.toJson(),
+    );
     if (!saved) {
       throw StateError('No fue posible guardar la ficha en este dispositivo.');
     }
@@ -202,9 +212,7 @@ class _DndCompanionAppState extends State<DndCompanionApp> {
             }
             if (!snapshot.hasData) {
               return const Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(color: _gold),
-                ),
+                body: Center(child: CircularProgressIndicator(color: _gold)),
               );
             }
             final data = snapshot.data!;
@@ -235,7 +243,11 @@ class _StartupError extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.redAccent,
+                    size: 48,
+                  ),
                   const SizedBox(height: 16),
                   const Text(
                     'No se pudo abrir la aplicación',
@@ -342,10 +354,8 @@ class _HomeShell extends StatelessWidget {
                       ),
                       const VerticalDivider(width: 1, color: Color(0xFF35332C)),
                       Expanded(
-                        child: IndexedStack(
-                          index: selectedIndex,
-                          children: views,
-                        ),
+                        child:
+                            IndexedStack(index: selectedIndex, children: views),
                       ),
                     ],
                   )
@@ -417,7 +427,8 @@ class _CharacterScreenState extends State<_CharacterScreen> {
         ),
       );
 
-  Widget _section(String title, IconData icon, List<Widget> children) => Container(
+  Widget _section(String title, IconData icon, List<Widget> children) =>
+      Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: _panel,
@@ -546,8 +557,10 @@ class _CharacterScreenState extends State<_CharacterScreen> {
                 ),
                 if (_saveError != null) ...[
                   const SizedBox(height: 12),
-                  Text('Error al guardar: $_saveError',
-                      style: const TextStyle(color: Colors.redAccent)),
+                  Text(
+                    'Error al guardar: $_saveError',
+                    style: const TextStyle(color: Colors.redAccent),
+                  ),
                 ],
                 const SizedBox(height: 22),
                 for (var i = 0; i < content.length; i++) ...[
@@ -619,9 +632,7 @@ class _SpellbookScreenState extends State<_SpellbookScreen> {
                       const Text(
                         'Compendio de conjuros',
                         style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                        ),
+                            fontSize: 24, fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 6),
                       const Text(
@@ -658,7 +669,8 @@ class _SpellbookScreenState extends State<_SpellbookScreen> {
                           SizedBox(
                             width: wide ? 180 : constraints.maxWidth,
                             child: DropdownButtonFormField<int?>(
-                              value: _level,
+                              initialValue: _level,
+                              isExpanded: true,
                               decoration: const InputDecoration(
                                 labelText: 'Nivel',
                                 contentPadding: EdgeInsets.symmetric(
@@ -684,7 +696,8 @@ class _SpellbookScreenState extends State<_SpellbookScreen> {
                           SizedBox(
                             width: wide ? 200 : constraints.maxWidth,
                             child: DropdownButtonFormField<String?>(
-                              value: _className,
+                              initialValue: _className,
+                              isExpanded: true,
                               decoration: const InputDecoration(
                                 labelText: 'Clase',
                                 contentPadding: EdgeInsets.symmetric(
@@ -833,10 +846,8 @@ class _SpellDetailsDialog extends StatelessWidget {
                 color: const Color(0xFF393126),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(
-                '${spell.level}',
-                style: const TextStyle(color: _gold),
-              ),
+              child:
+                  Text('${spell.level}', style: const TextStyle(color: _gold)),
             ),
             const SizedBox(width: 12),
             Expanded(child: Text(spell.name)),
@@ -877,12 +888,7 @@ class _SpellDetailsDialog extends StatelessWidget {
                 style: const TextStyle(color: _muted, fontSize: 13),
               ),
             ),
-            Expanded(
-              child: Text(
-                value,
-                style: const TextStyle(fontSize: 13),
-              ),
-            ),
+            Expanded(child: Text(value, style: const TextStyle(fontSize: 13))),
           ],
         ),
       );

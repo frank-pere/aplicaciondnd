@@ -1,0 +1,16 @@
+# Flutter and Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+build/
+coverage/
+
+# Editor and IDE files
+.idea/
+*.iml
+
+# Android local SDK configuration and signing keys
+android/local.properties
+android/key.properties
