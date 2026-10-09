@@ -1,0 +1,11 @@
+[
+  ["Bueno", "Legal Bueno", "LB", "Actúa como se espera de un individuo honorable y compasivo. Sigue el código, las leyes y la verdad para proteger a los inocentes y mantener el orden justo."],
+  ["Bueno", "Neutral Bueno", "NB", "Altruista e impulsado por hacer lo correcto sin depender de leyes o dogmas rígidos. Ayuda a quien lo necesita según lo requiera la situación."],
+  ["Bueno", "Caótico Bueno", "CB", "Actúa según su propia conciencia libre sin importar las expectativas de los demás. Valora la libertad individual y combate la tiranía con un fuerte sentido del bien."],
+  ["Neutral", "Legal Neutral", "LN", "Guiado por la tradición, la ley o un código personal estricto. Cree firmemente en la disciplina y el orden sin inclinarse hacia la compasión ni hacia la crueldad."],
+  ["Neutral", "Neutral Puro", "N", "Prefiere el equilibrio natural y evita tomar partido por convicciones morales extremas. A menudo actúa por pragmatismo, instinto o neutralidad ante el conflicto."],
+  ["Neutral", "Caótico Neutral", "CN", "Sigue sus caprichos y valora su propia libertad personal por encima de todo. Odia las restricciones y las reglas, pero no busca activamente hacer el bien o el mal."],
+  ["Malvado", "Legal Malvado", "LM", "Combina la disciplina, la jerarquía y el código con intenciones crueles o egoístas. Utiliza las reglas y el sistema para dominar, manipular o explotar a otros."],
+  ["Malvado", "Neutral Malvado", "NM", "Egoísmo puro sin escrúpulos ni honor. Hará todo lo necesario para salirse con la suya sin importar a quién dañe, pero sin la necesidad del caos violento ni de un código."],
+  ["Malvado", "Caótico Malvado", "CM", "Guiado por la codicia, el odio y la destrucción caprichosa. Es impredecible, violento y busca imponer su voluntad a través de la fuerza bruta y el desorden."]
+]

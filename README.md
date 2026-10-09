@@ -1,6 +1,6 @@
 # Crónicas 3.5
 
-Aplicación Flutter para Android y web con una ficha editable de personaje de D&D 3.5 y un compendio local de 66 conjuros importados de `Conjuros_DnD_3.5_Compendio.xlsx`. Los datos del compendio están empaquetados en `assets/data/spells.json`; la app no necesita conexión para consultarlos. La ficha se guarda localmente en el dispositivo o en el almacenamiento del navegador.
+Aplicación Flutter para Android y web con una ficha editable de personaje de D&D 3.5, un compendio local de 66 conjuros importados de `Conjuros_DnD_3.5_Compendio.xlsx` y un selector con las descripciones de los nueve alineamientos de `Alineamientos_DnD_3.5.xlsx`. Los datos están empaquetados en `assets/data/spells.json` y `assets/data/alignments.json`; la app no necesita conexión para consultarlos. La ficha se guarda localmente en el dispositivo o en el almacenamiento del navegador.
 
 ## Requisitos
 
@@ -95,6 +95,7 @@ Abre `http://localhost:8000`. El contenido de `build/web` también puede publica
 ## Funciones
 
 - Ficha editable con identidad, seis características, combate, salvaciones, habilidades, dotes, equipo y notas.
+- Selector de alineamiento con categorías, siglas y descripciones locales.
 - Guardado automático local sin crear cuenta.
 - Compendio integrado con búsqueda por nombre, escuela o clase, filtros por nivel y clase, y consulta de los detalles de cada conjuro.
 - Diseño adaptable a pantallas móviles y de escritorio.

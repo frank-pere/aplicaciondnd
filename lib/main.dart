@@ -54,6 +54,27 @@ class Spell {
   final String classes;
 }
 
+class CharacterAlignment {
+  const CharacterAlignment({
+    required this.category,
+    required this.name,
+    required this.abbreviation,
+    required this.description,
+  });
+
+  factory CharacterAlignment.fromRow(List<dynamic> row) => CharacterAlignment(
+        category: row[0] as String,
+        name: row[1] as String,
+        abbreviation: row[2] as String,
+        description: row[3] as String,
+      );
+
+  final String category;
+  final String name;
+  final String abbreviation;
+  final String description;
+}
+
 class CharacterSheet {
   CharacterSheet(this.values);
 
@@ -130,11 +151,20 @@ class DndCompanionApp extends StatefulWidget {
 }
 
 class _DndCompanionAppState extends State<DndCompanionApp> {
-  late final Future<({List<Spell> spells, CharacterSheet sheet})> _startup =
-      _load();
+  late final Future<
+      ({
+        List<Spell> spells,
+        List<CharacterAlignment> alignments,
+        CharacterSheet sheet
+      })> _startup = _load();
   int _selectedIndex = 0;
 
-  Future<({List<Spell> spells, CharacterSheet sheet})> _load() async {
+  Future<
+      ({
+        List<Spell> spells,
+        List<CharacterAlignment> alignments,
+        CharacterSheet sheet
+      })> _load() async {
     final rawSpells = await rootBundle.loadString('assets/data/spells.json');
     final rows = jsonDecode(rawSpells);
     if (rows is! List) {
@@ -150,11 +180,27 @@ class _DndCompanionAppState extends State<DndCompanionApp> {
       }
       return Spell.fromRow(row);
     }).toList(growable: false);
+    final rawAlignments =
+        await rootBundle.loadString('assets/data/alignments.json');
+    final alignmentRows = jsonDecode(rawAlignments);
+    if (alignmentRows is! List) {
+      throw const FormatException(
+        'Los alineamientos locales no tienen un formato válido.',
+      );
+    }
+    final alignments = alignmentRows.map((row) {
+      if (row is! List<dynamic> || row.length != 4) {
+        throw const FormatException(
+          'Un alineamiento local no tiene los cuatro campos esperados.',
+        );
+      }
+      return CharacterAlignment.fromRow(row);
+    }).toList(growable: false);
     final preferences = await SharedPreferences.getInstance();
     final saved = preferences.getString('character-sheet-v1');
     final sheet =
         saved == null ? CharacterSheet.empty() : CharacterSheet.fromJson(saved);
-    return (spells: spells, sheet: sheet);
+    return (spells: spells, alignments: alignments, sheet: sheet);
   }
 
   Future<void> _saveSheet(CharacterSheet sheet) async {
@@ -218,6 +264,7 @@ class _DndCompanionAppState extends State<DndCompanionApp> {
             final data = snapshot.data!;
             return _HomeShell(
               spells: data.spells,
+              alignments: data.alignments,
               initialSheet: data.sheet,
               selectedIndex: _selectedIndex,
               onSelected: (index) => setState(() => _selectedIndex = index),
@@ -272,6 +319,7 @@ class _StartupError extends StatelessWidget {
 class _HomeShell extends StatelessWidget {
   const _HomeShell({
     required this.spells,
+    required this.alignments,
     required this.initialSheet,
     required this.selectedIndex,
     required this.onSelected,
@@ -279,6 +327,7 @@ class _HomeShell extends StatelessWidget {
   });
 
   final List<Spell> spells;
+  final List<CharacterAlignment> alignments;
   final CharacterSheet initialSheet;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -302,7 +351,11 @@ class _HomeShell extends StatelessWidget {
         builder: (context, constraints) {
           final wide = constraints.maxWidth >= 760;
           final views = [
-            _CharacterScreen(initialSheet: initialSheet, onSave: onSaveSheet),
+            _CharacterScreen(
+              initialSheet: initialSheet,
+              alignments: alignments,
+              onSave: onSaveSheet,
+            ),
             _SpellbookScreen(spells: spells),
           ];
           return Scaffold(
@@ -373,9 +426,14 @@ class _HomeShell extends StatelessWidget {
 }
 
 class _CharacterScreen extends StatefulWidget {
-  const _CharacterScreen({required this.initialSheet, required this.onSave});
+  const _CharacterScreen({
+    required this.initialSheet,
+    required this.alignments,
+    required this.onSave,
+  });
 
   final CharacterSheet initialSheet;
+  final List<CharacterAlignment> alignments;
   final Future<void> Function(CharacterSheet) onSave;
 
   @override
@@ -427,6 +485,86 @@ class _CharacterScreenState extends State<_CharacterScreen> {
         ),
       );
 
+  int? _abilityModifier(String key) {
+    final score = int.tryParse(_controllers[key]!.text.trim());
+    return score == null ? null : ((score - 10) / 2).floor();
+  }
+
+  Widget _readOnlyAbilityCell(String label, int? modifier) {
+    final value = modifier == null
+        ? '—'
+        : modifier >= 0
+            ? '+$modifier'
+            : '$modifier';
+    return InputDecorator(
+      decoration: InputDecoration(labelText: label),
+      child: Text(value),
+    );
+  }
+
+  void _showAlignmentDetails(CharacterAlignment alignment) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => _AlignmentDetailsDialog(alignment: alignment),
+    );
+  }
+
+  Widget _alignmentField() {
+    final selectedName = _controllers['alignment']!.text;
+    CharacterAlignment? selectedAlignment;
+    for (final alignment in widget.alignments) {
+      if (alignment.name == selectedName) {
+        selectedAlignment = alignment;
+        break;
+      }
+    }
+    final alignmentForDetails = selectedAlignment;
+    return Row(
+      children: [
+        Expanded(
+          child: DropdownButtonFormField<String>(
+            initialValue: selectedAlignment?.name,
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: _fieldLabels['alignment'],
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 14,
+              ),
+            ),
+            items: [
+              for (final alignment in widget.alignments)
+                DropdownMenuItem(
+                  value: alignment.name,
+                  child: Text(
+                    alignment.name,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ],
+            onChanged: (name) {
+              if (name == null) return;
+              final alignment =
+                  widget.alignments.firstWhere((item) => item.name == name);
+              setState(() {
+                _controllers['alignment']!.text = name;
+              });
+              _updateSheet();
+              _showAlignmentDetails(alignment);
+            },
+          ),
+        ),
+        IconButton(
+          tooltip: 'Ver descripción del alineamiento',
+          onPressed: alignmentForDetails == null
+              ? null
+              : () => _showAlignmentDetails(alignmentForDetails),
+          icon: const Icon(Icons.info_outline),
+        ),
+      ],
+    );
+  }
+
   Widget _section(String title, IconData icon, List<Widget> children) =>
       Container(
         padding: const EdgeInsets.all(20),
@@ -477,6 +615,66 @@ class _CharacterScreenState extends State<_CharacterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final abilitySection = _section('Características', Icons.bolt_outlined, [
+      Column(
+        children: [
+          for (final entry in _abilityLabels.entries)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: TextField(
+                      controller: _controllers[entry.key],
+                      onChanged: (_) => setState(_updateSheet),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        signed: true,
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(labelText: entry.value),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 4,
+                    child: _readOnlyAbilityCell(
+                      'Mod.',
+                      _abilityModifier(entry.key),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 5,
+                    child: _readOnlyAbilityCell('Temp.', null),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      const Text(
+        'El modificador se calcula con (puntuación − 10) ÷ 2, redondeado hacia abajo. El temporal está pendiente.',
+        style: TextStyle(color: _muted, fontSize: 12),
+      ),
+    ]);
+    final combatSection =
+        _section('Combate y defensas', Icons.shield_outlined, [
+      _grid([
+        _field('hp'),
+        _field('initiative'),
+        _field('speed'),
+        _field('armorClass'),
+        _field('touch'),
+        _field('flatFooted'),
+        _field('baseAttack'),
+        _field('grapple'),
+        _field('fortitude'),
+        _field('reflex'),
+        _field('will'),
+      ]),
+    ]);
     final content = [
       _section('Identidad', Icons.person_outline, [
         _grid([
@@ -484,7 +682,7 @@ class _CharacterScreenState extends State<_CharacterScreen> {
           _field('player'),
           _field('race'),
           _field('class'),
-          _field('alignment'),
+          _alignmentField(),
           _field('deity'),
           _field('size'),
           _field('age'),
@@ -493,40 +691,27 @@ class _CharacterScreenState extends State<_CharacterScreen> {
           _field('experience'),
         ]),
       ]),
-      _section('Características', Icons.bolt_outlined, [
-        _grid([
-          for (final entry in _abilityLabels.entries)
-            TextField(
-              controller: _controllers[entry.key],
-              onChanged: (_) => _updateSheet(),
-              keyboardType: const TextInputType.numberWithOptions(
-                signed: true,
-                decimal: true,
-              ),
-              decoration: InputDecoration(labelText: entry.value),
-            ),
-        ], width: 140),
-        const SizedBox(height: 10),
-        const Text(
-          'Anota el valor de característica o su modificador.',
-          style: TextStyle(color: _muted, fontSize: 12),
-        ),
-      ]),
-      _section('Combate y defensas', Icons.shield_outlined, [
-        _grid([
-          _field('hp'),
-          _field('initiative'),
-          _field('speed'),
-          _field('armorClass'),
-          _field('touch'),
-          _field('flatFooted'),
-          _field('baseAttack'),
-          _field('grapple'),
-          _field('fortitude'),
-          _field('reflex'),
-          _field('will'),
-        ]),
-      ]),
+      LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 900) {
+            return Column(
+              children: [
+                abilitySection,
+                const SizedBox(height: 16),
+                combatSection,
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: abilitySection),
+              const SizedBox(width: 16),
+              Expanded(child: combatSection),
+            ],
+          );
+        },
+      ),
       _section('Aventurero', Icons.backpack_outlined, [
         _field('skills', lines: 3),
         const SizedBox(height: 12),
@@ -827,6 +1012,61 @@ class _SpellCard extends StatelessWidget {
             ),
           ),
         ),
+      );
+}
+
+class _AlignmentDetailsDialog extends StatelessWidget {
+  const _AlignmentDetailsDialog({required this.alignment});
+
+  final CharacterAlignment alignment;
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+        backgroundColor: _panel,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF393126),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                alignment.abbreviation,
+                style: const TextStyle(color: _gold),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(alignment.name)),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Categoría moral',
+                style: TextStyle(color: _muted, fontSize: 13),
+              ),
+              const SizedBox(height: 4),
+              Text(alignment.category),
+              const SizedBox(height: 16),
+              const Text(
+                'Descripción',
+                style: TextStyle(color: _muted, fontSize: 13),
+              ),
+              const SizedBox(height: 4),
+              Text(alignment.description),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cerrar'),
+          ),
+        ],
       );
 }
 

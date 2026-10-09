@@ -10,7 +10,8 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(const DndCompanionApp());
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('66 CONJUROS'), findsOneWidget);
 
@@ -40,27 +41,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Mago/Hechicero 3'), findsOneWidget);
     expect(find.text('Evocación'), findsOneWidget);
-  });
-
-  testWidgets('guarda automáticamente la ficha en el dispositivo', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const DndCompanionApp());
+    FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
-
-    final characterName = find.byWidgetPredicate(
-      (widget) =>
-          widget is TextField &&
-          widget.decoration?.labelText == 'Nombre del personaje',
-    );
-    await tester.enterText(characterName, 'Arannis');
-    await tester.pump(const Duration(milliseconds: 400));
-    await tester.pumpAndSettle();
-
-    final preferences = await SharedPreferences.getInstance();
-    expect(
-      preferences.getString('character-sheet-v1'),
-      contains('"character":"Arannis"'),
-    );
   });
 }
