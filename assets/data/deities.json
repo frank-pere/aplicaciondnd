@@ -1,6 +1,7 @@
 [
   {
     "name": "Boccob",
+    "pantheon": "D&D",
     "description": "Dios de la magia, el conocimiento y los arcanos. Neutral e indiferente hacia el bien o el mal, Boccob vigila el equilibrio mágico del universo.",
     "divineRank": "Deidad Mayor (17)",
     "alignment": "Neutral (N)",
@@ -11,6 +12,7 @@
   },
   {
     "name": "Corellon Larethian",
+    "pantheon": "D&D",
     "description": "Creador y protector de la raza élfica. Maestro de la magia arcana, el arte de la espada y la poesía.",
     "divineRank": "Deidad Mayor (19)",
     "alignment": "Caótico Bueno (CB)",
@@ -21,6 +23,7 @@
   },
   {
     "name": "Ehlonna",
+    "pantheon": "D&D",
     "description": "Diosa de los bosques y criaturas salvajes. Protege a los cazadores de buena fe y a los habitantes de los bosques.",
     "divineRank": "Deidad Intermedia (11)",
     "alignment": "Neutral Bueno (NB)",
@@ -31,6 +34,7 @@
   },
   {
     "name": "Erythnul",
+    "pantheon": "D&D",
     "description": "El Muchos, dios de la masacre y el caos sangriento. Adorado por orcos, bárbaros violentos y criminales.",
     "divineRank": "Deidad Intermedia (10)",
     "alignment": "Caótico Malvado (CM)",
@@ -41,6 +45,7 @@
   },
   {
     "name": "Fharlanghn",
+    "pantheon": "D&D",
     "description": "El Morador del Horizonte, patrón de los viajeros, mercaderes y exploradores que recorren largas distancias.",
     "divineRank": "Deidad Intermedia (12)",
     "alignment": "Neutral (N)",
@@ -51,6 +56,7 @@
   },
   {
     "name": "Garl del Oro Reluciente",
+    "pantheon": "D&D",
     "description": "Líder del panteón gnomo, conocido por su ingenio, bromas pesadas y protección hacia su pueblo.",
     "divineRank": "Deidad Mayor (18)",
     "alignment": "Caótico Bueno (CB)",
@@ -61,6 +67,7 @@
   },
   {
     "name": "Gruumsh",
+    "pantheon": "D&D",
     "description": "El Dios Tuerto, señor supremo de las hordas orcas. Promueve la conquista sangrienta y el odio hacia elfos y enanos.",
     "divineRank": "Deidad Mayor (16)",
     "alignment": "Caótico Malvado (CM)",
@@ -71,6 +78,7 @@
   },
   {
     "name": "Heironeous",
+    "pantheon": "D&D",
     "description": "Dios de la caballería, la justicia y el valor en batalla. Enemigo mortal de su hermano Hextor.",
     "divineRank": "Deidad Intermedia (15)",
     "alignment": "Legal Bueno (LB)",
@@ -81,6 +89,7 @@
   },
   {
     "name": "Hextor",
+    "pantheon": "D&D",
     "description": "Dios de la guerra cruel, la tiranía y la opresión. Exige disciplina de hierro y dominación sobre los débiles.",
     "divineRank": "Deidad Intermedia (15)",
     "alignment": "Legal Malvado (LM)",
@@ -91,6 +100,7 @@
   },
   {
     "name": "Kord",
+    "pantheon": "D&D",
     "description": "Dios del valor físico, la fuerza bruta y los atletas. Disfruta de las pruebas de fuerza y las batallas justas.",
     "divineRank": "Deidad Intermedia (14)",
     "alignment": "Caótico Bueno (CB)",
@@ -101,6 +111,7 @@
   },
   {
     "name": "Moradin",
+    "pantheon": "D&D",
     "description": "El Forjador de Almas, creador de los enanos. Enseña el valor del trabajo duro, la familia y la tradición.",
     "divineRank": "Deidad Mayor (20)",
     "alignment": "Legal Bueno (LB)",
@@ -111,6 +122,7 @@
   },
   {
     "name": "Nerull",
+    "pantheon": "D&D",
     "description": "El Cosechador, dios de la muerte, las plagas y los no-muertos. Odia toda forma de vida y luz.",
     "divineRank": "Deidad Mayor (17)",
     "alignment": "Neutral Malvado (NM)",
@@ -121,6 +133,7 @@
   },
   {
     "name": "Obad-Hai",
+    "pantheon": "D&D",
     "description": "El Siervo de la Naturaleza, representa el ciclo salvaje y neutral del mundo natural sin intervención civilizada.",
     "divineRank": "Deidad Intermedia (13)",
     "alignment": "Neutral (N)",
@@ -131,6 +144,7 @@
   },
   {
     "name": "Olidammara",
+    "pantheon": "D&D",
     "description": "El Dios de los Pícaros. Patrón del vino, la música, las bromas, los robos ingeniosos y las fiestas.",
     "divineRank": "Deidad Intermedia (12)",
     "alignment": "Caótico Neutral (CN)",
@@ -141,6 +155,7 @@
   },
   {
     "name": "Pelor",
+    "pantheon": "D&D",
     "description": "El Sol Brillante, dios de la compasión, la curación y la vida. Es la deidad más ampliamente adorada por el pueblo llano.",
     "divineRank": "Deidad Mayor (17)",
     "alignment": "Neutral Bueno (NB)",
@@ -151,6 +166,7 @@
   },
   {
     "name": "Saint Cuthbert",
+    "pantheon": "D&D",
     "description": "Dios de la retribución honesta, la disciplina y el sentido común. Exige firmeza contra el mal y la necedad.",
     "divineRank": "Deidad Menor (10)",
     "alignment": "Legal Neutral (LN)",
@@ -161,6 +177,7 @@
   },
   {
     "name": "Tiamat",
+    "pantheon": "D&D",
     "description": "Diosa de los dragones cromáticos y conquistadores. Manifestada como un dragón gigantesco de 5 cabezas.",
     "divineRank": "Deidad Menor (10)",
     "alignment": "Legal Malvado (LM)",
@@ -171,6 +188,7 @@
   },
   {
     "name": "Vecna",
+    "pantheon": "D&D",
     "description": "El Mutilado, dios de los secretos prohibidos y la nigromancia. Ex-lich ascendido a la divinidad.",
     "divineRank": "Deidad Menor (10)",
     "alignment": "Neutral Malvado (NM)",
@@ -181,6 +199,7 @@
   },
   {
     "name": "Wee Jas",
+    "pantheon": "D&D",
     "description": "Diosa de la magia arcana y la muerte respetable. Valora la disciplina, las leyes mágicas y la belleza estéticamente perfecta.",
     "divineRank": "Deidad Intermedia (14)",
     "alignment": "Legal Neutral (LN)",
@@ -191,6 +210,7 @@
   },
   {
     "name": "Yondalla",
+    "pantheon": "D&D",
     "description": "La Bendecida, protectora de la raza de los medianos. Promueve la armonía familiar, la paz y la abundancia agrícola.",
     "divineRank": "Deidad Mayor (18)",
     "alignment": "Legal Bueno (LB)",

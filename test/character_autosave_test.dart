@@ -68,6 +68,7 @@ void main() {
     await tester.tap(deityField);
     await tester.pumpAndSettle();
     expect(find.text('20 de 20 deidades'), findsOneWidget);
+    expect(find.text('D&D'), findsWidgets);
 
     final deityFilter = find.byWidgetPredicate(
       (widget) =>
@@ -81,6 +82,7 @@ void main() {
     expect(find.text('Fharlanghn'), findsOneWidget);
     await tester.tap(find.text('Fharlanghn'));
     await tester.pumpAndSettle();
+    expect(find.text('D&D'), findsOneWidget);
     expect(find.text('Descripción'), findsOneWidget);
     expect(
       find.text(

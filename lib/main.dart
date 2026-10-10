@@ -78,6 +78,7 @@ class CharacterAlignment {
 class CharacterDeity {
   const CharacterDeity({
     required this.name,
+    required this.pantheon,
     required this.description,
     required this.divineRank,
     required this.alignment,
@@ -89,6 +90,7 @@ class CharacterDeity {
 
   factory CharacterDeity.fromJson(Map<String, dynamic> json) => CharacterDeity(
         name: json['name'] as String,
+        pantheon: json['pantheon'] as String,
         description: json['description'] as String,
         divineRank: json['divineRank'] as String,
         alignment: json['alignment'] as String,
@@ -99,6 +101,7 @@ class CharacterDeity {
       );
 
   final String name;
+  final String pantheon;
   final String description;
   final String divineRank;
   final String alignment;
@@ -1138,6 +1141,30 @@ class _SpellCard extends StatelessWidget {
       );
 }
 
+class _PantheonCapsule extends StatelessWidget {
+  const _PantheonCapsule({required this.pantheon});
+
+  final String pantheon;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+        decoration: BoxDecoration(
+          color: const Color(0xFF393126),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFF665238)),
+        ),
+        child: Text(
+          pantheon,
+          style: const TextStyle(
+            color: _gold,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+}
+
 class _DeityPickerDialog extends StatefulWidget {
   const _DeityPickerDialog({required this.deities});
 
@@ -1220,7 +1247,13 @@ class _DeityPickerDialogState extends State<_DeityPickerDialog> {
                             color: const Color(0xFF292822),
                             margin: EdgeInsets.zero,
                             child: ListTile(
-                              title: Text(deity.name),
+                              title: Row(
+                                children: [
+                                  Expanded(child: Text(deity.name)),
+                                  const SizedBox(width: 8),
+                                  _PantheonCapsule(pantheon: deity.pantheon),
+                                ],
+                              ),
                               subtitle: Text(
                                 '${deity.alignment} · ${deity.portfolio}',
                                 maxLines: 2,
@@ -1259,7 +1292,13 @@ class _DeityDetailsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AlertDialog(
         backgroundColor: _panel,
-        title: Text(deity.name),
+        title: Row(
+          children: [
+            Expanded(child: Text(deity.name)),
+            const SizedBox(width: 8),
+            _PantheonCapsule(pantheon: deity.pantheon),
+          ],
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

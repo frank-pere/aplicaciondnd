@@ -96,7 +96,7 @@ Abre `http://localhost:8000`. El contenido de `build/web` también puede publica
 
 - Ficha editable con identidad, seis características, combate, salvaciones, habilidades, dotes, equipo y notas.
 - Selector de alineamiento con categorías, siglas y descripciones locales.
-- Selector de deidades con filtro por nombre, ámbito, dominio o alineamiento, y consulta de los datos descriptivos de cada una.
+- Selector de deidades del panteón D&D, identificado con una cápsula visual, con filtro por nombre, ámbito, dominio o alineamiento y consulta de sus descripciones.
 - Guardado automático local sin crear cuenta.
 - Compendio integrado con búsqueda por nombre, escuela o clase, filtros por nivel y clase, y consulta de los detalles de cada conjuro.
 - Diseño adaptable a pantallas móviles y de escritorio.
