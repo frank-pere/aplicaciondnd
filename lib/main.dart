@@ -75,6 +75,39 @@ class CharacterAlignment {
   final String description;
 }
 
+class CharacterDeity {
+  const CharacterDeity({
+    required this.name,
+    required this.description,
+    required this.divineRank,
+    required this.alignment,
+    required this.clericAlignments,
+    required this.portfolio,
+    required this.domains,
+    required this.favoredWeapon,
+  });
+
+  factory CharacterDeity.fromJson(Map<String, dynamic> json) => CharacterDeity(
+        name: json['name'] as String,
+        description: json['description'] as String,
+        divineRank: json['divineRank'] as String,
+        alignment: json['alignment'] as String,
+        clericAlignments: json['clericAlignments'] as String,
+        portfolio: json['portfolio'] as String,
+        domains: json['domains'] as String,
+        favoredWeapon: json['favoredWeapon'] as String,
+      );
+
+  final String name;
+  final String description;
+  final String divineRank;
+  final String alignment;
+  final String clericAlignments;
+  final String portfolio;
+  final String domains;
+  final String favoredWeapon;
+}
+
 class CharacterSheet {
   CharacterSheet(this.values);
 
@@ -155,6 +188,7 @@ class _DndCompanionAppState extends State<DndCompanionApp> {
       ({
         List<Spell> spells,
         List<CharacterAlignment> alignments,
+        List<CharacterDeity> deities,
         CharacterSheet sheet
       })> _startup = _load();
   int _selectedIndex = 0;
@@ -163,6 +197,7 @@ class _DndCompanionAppState extends State<DndCompanionApp> {
       ({
         List<Spell> spells,
         List<CharacterAlignment> alignments,
+        List<CharacterDeity> deities,
         CharacterSheet sheet
       })> _load() async {
     final rawSpells = await rootBundle.loadString('assets/data/spells.json');
@@ -196,11 +231,32 @@ class _DndCompanionAppState extends State<DndCompanionApp> {
       }
       return CharacterAlignment.fromRow(row);
     }).toList(growable: false);
+    final rawDeities = await rootBundle.loadString('assets/data/deities.json');
+    final deityRows = jsonDecode(rawDeities);
+    if (deityRows is! List) {
+      throw const FormatException(
+        'Las deidades locales no tienen un formato válido.',
+      );
+    }
+    final deities = deityRows.map((row) {
+      if (row is! Map<String, dynamic> ||
+          row.values.any((value) => value is! String)) {
+        throw const FormatException(
+          'Una deidad local no tiene el formato esperado.',
+        );
+      }
+      return CharacterDeity.fromJson(row);
+    }).toList(growable: false);
     final preferences = await SharedPreferences.getInstance();
     final saved = preferences.getString('character-sheet-v1');
     final sheet =
         saved == null ? CharacterSheet.empty() : CharacterSheet.fromJson(saved);
-    return (spells: spells, alignments: alignments, sheet: sheet);
+    return (
+      spells: spells,
+      alignments: alignments,
+      deities: deities,
+      sheet: sheet
+    );
   }
 
   Future<void> _saveSheet(CharacterSheet sheet) async {
@@ -265,6 +321,7 @@ class _DndCompanionAppState extends State<DndCompanionApp> {
             return _HomeShell(
               spells: data.spells,
               alignments: data.alignments,
+              deities: data.deities,
               initialSheet: data.sheet,
               selectedIndex: _selectedIndex,
               onSelected: (index) => setState(() => _selectedIndex = index),
@@ -320,6 +377,7 @@ class _HomeShell extends StatelessWidget {
   const _HomeShell({
     required this.spells,
     required this.alignments,
+    required this.deities,
     required this.initialSheet,
     required this.selectedIndex,
     required this.onSelected,
@@ -328,6 +386,7 @@ class _HomeShell extends StatelessWidget {
 
   final List<Spell> spells;
   final List<CharacterAlignment> alignments;
+  final List<CharacterDeity> deities;
   final CharacterSheet initialSheet;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
@@ -354,6 +413,7 @@ class _HomeShell extends StatelessWidget {
             _CharacterScreen(
               initialSheet: initialSheet,
               alignments: alignments,
+              deities: deities,
               onSave: onSaveSheet,
             ),
             _SpellbookScreen(spells: spells),
@@ -429,11 +489,13 @@ class _CharacterScreen extends StatefulWidget {
   const _CharacterScreen({
     required this.initialSheet,
     required this.alignments,
+    required this.deities,
     required this.onSave,
   });
 
   final CharacterSheet initialSheet;
   final List<CharacterAlignment> alignments;
+  final List<CharacterDeity> deities;
   final Future<void> Function(CharacterSheet) onSave;
 
   @override
@@ -509,6 +571,24 @@ class _CharacterScreenState extends State<_CharacterScreen> {
     );
   }
 
+  void _showDeityDetails(CharacterDeity deity) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => _DeityDetailsDialog(deity: deity),
+    );
+  }
+
+  Future<void> _chooseDeity() async {
+    final deity = await showDialog<CharacterDeity>(
+      context: context,
+      builder: (context) => _DeityPickerDialog(deities: widget.deities),
+    );
+    if (deity == null || !mounted) return;
+    setState(() => _controllers['deity']!.text = deity.name);
+    _updateSheet();
+    _showDeityDetails(deity);
+  }
+
   Widget _alignmentField() {
     final selectedName = _controllers['alignment']!.text;
     CharacterAlignment? selectedAlignment;
@@ -559,6 +639,49 @@ class _CharacterScreenState extends State<_CharacterScreen> {
           onPressed: alignmentForDetails == null
               ? null
               : () => _showAlignmentDetails(alignmentForDetails),
+          icon: const Icon(Icons.info_outline),
+        ),
+      ],
+    );
+  }
+
+  Widget _deityField() {
+    final selectedName = _controllers['deity']!.text;
+    CharacterDeity? selectedDeity;
+    for (final deity in widget.deities) {
+      if (deity.name == selectedName) {
+        selectedDeity = deity;
+        break;
+      }
+    }
+    final deityForDetails = selectedDeity;
+    return Row(
+      children: [
+        Expanded(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: _chooseDeity,
+            child: InputDecorator(
+              decoration: InputDecoration(
+                labelText: _fieldLabels['deity'],
+                suffixIcon: const Icon(Icons.arrow_drop_down),
+              ),
+              child: Text(
+                selectedName.isEmpty ? 'Seleccionar deidad' : selectedName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: selectedName.isEmpty ? _muted : Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+        IconButton(
+          tooltip: 'Ver descripción de la deidad',
+          onPressed: deityForDetails == null
+              ? null
+              : () => _showDeityDetails(deityForDetails),
           icon: const Icon(Icons.info_outline),
         ),
       ],
@@ -683,7 +806,7 @@ class _CharacterScreenState extends State<_CharacterScreen> {
           _field('race'),
           _field('class'),
           _alignmentField(),
-          _field('deity'),
+          _deityField(),
           _field('size'),
           _field('age'),
           _field('height'),
@@ -1011,6 +1134,165 @@ class _SpellCard extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      );
+}
+
+class _DeityPickerDialog extends StatefulWidget {
+  const _DeityPickerDialog({required this.deities});
+
+  final List<CharacterDeity> deities;
+
+  @override
+  State<_DeityPickerDialog> createState() => _DeityPickerDialogState();
+}
+
+class _DeityPickerDialogState extends State<_DeityPickerDialog> {
+  String _query = '';
+
+  List<CharacterDeity> get _filteredDeities {
+    final query = _query.trim().toLowerCase();
+    return widget.deities.where((deity) {
+      final searchable = [
+        deity.name,
+        deity.description,
+        deity.divineRank,
+        deity.alignment,
+        deity.clericAlignments,
+        deity.portfolio,
+        deity.domains,
+        deity.favoredWeapon,
+      ].join(' ').toLowerCase();
+      return searchable.contains(query);
+    }).toList(growable: false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final deities = _filteredDeities;
+    final screenSize = MediaQuery.sizeOf(context);
+    return Dialog(
+      backgroundColor: _panel,
+      insetPadding: const EdgeInsets.all(16),
+      child: SizedBox(
+        width: screenSize.width > 760 ? 680 : screenSize.width * 0.9,
+        height: screenSize.height * 0.82,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Seleccionar deidad',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                autofocus: true,
+                onChanged: (value) => setState(() => _query = value),
+                decoration: const InputDecoration(
+                  labelText:
+                      'Filtrar por nombre, ámbito, dominio o alineamiento',
+                  prefixIcon: Icon(Icons.search),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '${deities.length} de ${widget.deities.length} deidades',
+                style: const TextStyle(color: _muted, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: deities.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No hay deidades que coincidan con la búsqueda.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: _muted),
+                        ),
+                      )
+                    : ListView.separated(
+                        itemCount: deities.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final deity = deities[index];
+                          return Card(
+                            color: const Color(0xFF292822),
+                            margin: EdgeInsets.zero,
+                            child: ListTile(
+                              title: Text(deity.name),
+                              subtitle: Text(
+                                '${deity.alignment} · ${deity.portfolio}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              trailing: const Icon(
+                                Icons.chevron_right,
+                                color: _muted,
+                              ),
+                              onTap: () => Navigator.of(context).pop(deity),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancelar'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeityDetailsDialog extends StatelessWidget {
+  const _DeityDetailsDialog({required this.deity});
+
+  final CharacterDeity deity;
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+        backgroundColor: _panel,
+        title: Text(deity.name),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _detail('Ámbito de poder', deity.portfolio),
+              _detail('Rango divino', deity.divineRank),
+              _detail('Alineamiento', deity.alignment),
+              _detail('Alineamientos de clérigos', deity.clericAlignments),
+              _detail('Dominios', deity.domains),
+              _detail('Arma predilecta', deity.favoredWeapon),
+              const Divider(height: 20, color: Color(0xFF39372F)),
+              _detail('Descripción', deity.description),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      );
+
+  Widget _detail(String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 7),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: const TextStyle(color: _muted, fontSize: 12)),
+            const SizedBox(height: 3),
+            Text(value, style: const TextStyle(fontSize: 14)),
+          ],
         ),
       );
 }

@@ -58,19 +58,60 @@ void main() {
       findsNothing,
     );
 
-    final deityField = find.byWidgetPredicate(
-      (widget) =>
-          widget is TextField && widget.decoration?.labelText == 'Deidad',
+    final deityField = find.text('Seleccionar deidad');
+    await tester.scrollUntilVisible(
+      deityField,
+      200,
+      scrollable: find.byType(Scrollable).first,
     );
-    expect(deityField, findsOneWidget);
-    await tester.ensureVisible(deityField);
-    await tester.enterText(deityField, 'Eilistraee');
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    await tester.tap(deityField);
+    await tester.pumpAndSettle();
+    expect(find.text('20 de 20 deidades'), findsOneWidget);
+
+    final deityFilter = find.byWidgetPredicate(
+      (widget) =>
+          widget is TextField &&
+          widget.decoration?.labelText ==
+              'Filtrar por nombre, ámbito, dominio o alineamiento',
+    );
+    await tester.enterText(deityFilter, 'viajes');
+    await tester.pump();
+    expect(find.text('1 de 20 deidades'), findsOneWidget);
+    expect(find.text('Fharlanghn'), findsOneWidget);
+    await tester.tap(find.text('Fharlanghn'));
+    await tester.pumpAndSettle();
+    expect(find.text('Descripción'), findsOneWidget);
+    expect(
+      find.text(
+        'El Morador del Horizonte, patrón de los viajeros, mercaderes y exploradores que recorren largas distancias.',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Cerrar'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 350));
+
     final deityPreferences = await SharedPreferences.getInstance();
     expect(
       deityPreferences.getString('character-sheet-v1'),
-      contains('"deity":"Eilistraee"'),
+      contains('"deity":"Fharlanghn"'),
     );
+
+    await tester.tap(find.byTooltip('Ver descripción de la deidad'));
+    await tester.pumpAndSettle();
+    expect(find.text('Báculo de caminante'), findsOneWidget);
+    final deityDetailLabels = tester
+        .widgetList<Text>(find.byType(Text))
+        .map((text) => text.data)
+        .whereType<String>()
+        .toList();
+    expect(
+      deityDetailLabels.indexOf('Descripción'),
+      greaterThan(deityDetailLabels.indexOf('Arma predilecta')),
+    );
+    await tester.tap(find.text('Cerrar'));
+    await tester.pumpAndSettle();
 
     final alignmentSelector = find.byWidgetPredicate(
       (widget) =>

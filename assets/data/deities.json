@@ -1,0 +1,202 @@
+[
+  {
+    "name": "Boccob",
+    "description": "Dios de la magia, el conocimiento y los arcanos. Neutral e indiferente hacia el bien o el mal, Boccob vigila el equilibrio mágico del universo.",
+    "divineRank": "Deidad Mayor (17)",
+    "alignment": "Neutral (N)",
+    "clericAlignments": "CN, LN, N, NM, NB",
+    "portfolio": "Magia, Conocimiento Arcanos, Equilibrio, Prudencia",
+    "domains": "Saber, Magia, Supercheria.",
+    "favoredWeapon": "Báculo (Báculo de madera)"
+  },
+  {
+    "name": "Corellon Larethian",
+    "description": "Creador y protector de la raza élfica. Maestro de la magia arcana, el arte de la espada y la poesía.",
+    "divineRank": "Deidad Mayor (19)",
+    "alignment": "Caótico Bueno (CB)",
+    "clericAlignments": "CB, CN, NB",
+    "portfolio": "Elfos, Magia, Música, Artes, Guerra",
+    "domains": "Bien, Caos, Guerra, Protección",
+    "favoredWeapon": "Espada larga"
+  },
+  {
+    "name": "Ehlonna",
+    "description": "Diosa de los bosques y criaturas salvajes. Protege a los cazadores de buena fe y a los habitantes de los bosques.",
+    "divineRank": "Deidad Intermedia (11)",
+    "alignment": "Neutral Bueno (NB)",
+    "clericAlignments": "CB, LB, NB",
+    "portfolio": "Bosques, Vida silvestre, Naturaleza, Fertilidad",
+    "domains": "Animal, Bien, Plantas, Sol",
+    "favoredWeapon": "Arco largo"
+  },
+  {
+    "name": "Erythnul",
+    "description": "El Muchos, dios de la masacre y el caos sangriento. Adorado por orcos, bárbaros violentos y criminales.",
+    "divineRank": "Deidad Intermedia (10)",
+    "alignment": "Caótico Malvado (CM)",
+    "clericAlignments": "CM, CN, NM",
+    "portfolio": "Matanza, Odio, Envidia, Malicia, Panico, Fiereza",
+    "domains": "Caos, Mal, Guerra, Supercheria",
+    "favoredWeapon": "Maza de armas (Maza de tres cabezas)"
+  },
+  {
+    "name": "Fharlanghn",
+    "description": "El Morador del Horizonte, patrón de los viajeros, mercaderes y exploradores que recorren largas distancias.",
+    "divineRank": "Deidad Intermedia (12)",
+    "alignment": "Neutral (N)",
+    "clericAlignments": "CN, LN, N, NM, NB",
+    "portfolio": "Caminos, Viajes, Horizontes, Movimiento",
+    "domains": "Protección, Viaje, Suerte",
+    "favoredWeapon": "Báculo de caminante"
+  },
+  {
+    "name": "Garl del Oro Reluciente",
+    "description": "Líder del panteón gnomo, conocido por su ingenio, bromas pesadas y protección hacia su pueblo.",
+    "divineRank": "Deidad Mayor (18)",
+    "alignment": "Caótico Bueno (CB)",
+    "clericAlignments": "CB, NB,LB",
+    "portfolio": "Gnomos, Humor, Ilusion, Gemas",
+    "domains": "Bien, Protección, supercheria",
+    "favoredWeapon": "Hacha de peto (Hacha pequeña)"
+  },
+  {
+    "name": "Gruumsh",
+    "description": "El Dios Tuerto, señor supremo de las hordas orcas. Promueve la conquista sangrienta y el odio hacia elfos y enanos.",
+    "divineRank": "Deidad Mayor (16)",
+    "alignment": "Caótico Malvado (CM)",
+    "clericAlignments": "CM, CN, NM",
+    "portfolio": "Orcos, Guerra, Territorio",
+    "domains": "Caos, Mal, Fuerza, Guerra",
+    "favoredWeapon": "Lanza corta / Lanza"
+  },
+  {
+    "name": "Heironeous",
+    "description": "Dios de la caballería, la justicia y el valor en batalla. Enemigo mortal de su hermano Hextor.",
+    "divineRank": "Deidad Intermedia (15)",
+    "alignment": "Legal Bueno (LB)",
+    "clericAlignments": "LB, LN, NB",
+    "portfolio": "Valor, Civaltería, Justicia, Honor, Guerra",
+    "domains": "Bien, Ley, Guerra, Valor",
+    "favoredWeapon": "Espada larga"
+  },
+  {
+    "name": "Hextor",
+    "description": "Dios de la guerra cruel, la tiranía y la opresión. Exige disciplina de hierro y dominación sobre los débiles.",
+    "divineRank": "Deidad Intermedia (15)",
+    "alignment": "Legal Malvado (LM)",
+    "clericAlignments": "LM, LN, NM",
+    "portfolio": "Tiranía, Guerra, Discordia, Masacre",
+    "domains": "Ley, Mal, Guerra, Destrucción",
+    "favoredWeapon": "Flajelo (Flote de hierro)"
+  },
+  {
+    "name": "Kord",
+    "description": "Dios del valor físico, la fuerza bruta y los atletas. Disfruta de las pruebas de fuerza y las batallas justas.",
+    "divineRank": "Deidad Intermedia (14)",
+    "alignment": "Caótico Bueno (CB)",
+    "clericAlignments": "CB, LB, NB",
+    "portfolio": "Fuerza, Atletas, Competición, Coraje",
+    "domains": "Bien, Caos, Fuerza, Suerte",
+    "favoredWeapon": "Espadón (Espada a dos manos)"
+  },
+  {
+    "name": "Moradin",
+    "description": "El Forjador de Almas, creador de los enanos. Enseña el valor del trabajo duro, la familia y la tradición.",
+    "divineRank": "Deidad Mayor (20)",
+    "alignment": "Legal Bueno (LB)",
+    "clericAlignments": "LB, LN, NB",
+    "portfolio": "Enanos, Creación, Forja, Ingeniería, Guerra",
+    "domains": "Bien, Ley, Protección, Tierra",
+    "favoredWeapon": "Martillo de guerra"
+  },
+  {
+    "name": "Nerull",
+    "description": "El Cosechador, dios de la muerte, las plagas y los no-muertos. Odia toda forma de vida y luz.",
+    "divineRank": "Deidad Mayor (17)",
+    "alignment": "Neutral Malvado (NM)",
+    "clericAlignments": "CM, LM, NM",
+    "portfolio": "Muerte, Oscuridad, Asesinato, Nigromancia",
+    "domains": "Mal, Muerte, Supercheria",
+    "favoredWeapon": "Guadaña"
+  },
+  {
+    "name": "Obad-Hai",
+    "description": "El Siervo de la Naturaleza, representa el ciclo salvaje y neutral del mundo natural sin intervención civilizada.",
+    "divineRank": "Deidad Intermedia (13)",
+    "alignment": "Neutral (N)",
+    "clericAlignments": "CN, LN, N, NM, NB",
+    "portfolio": "Naturaleza, Libertad, Fauna, Flora",
+    "domains": "Animal, Aire, Fuego, Plantas, Tierra, Agua",
+    "favoredWeapon": "Báculo / Bastón"
+  },
+  {
+    "name": "Olidammara",
+    "description": "El Dios de los Pícaros. Patrón del vino, la música, las bromas, los robos ingeniosos y las fiestas.",
+    "divineRank": "Deidad Intermedia (12)",
+    "alignment": "Caótico Neutral (CN)",
+    "clericAlignments": "CM, CB, CN",
+    "portfolio": "Picaros, Musica, diversion, vino, humor, Engaños",
+    "domains": "Caos, Suerte, Supercheria",
+    "favoredWeapon": "Ropera (Espada ropera)"
+  },
+  {
+    "name": "Pelor",
+    "description": "El Sol Brillante, dios de la compasión, la curación y la vida. Es la deidad más ampliamente adorada por el pueblo llano.",
+    "divineRank": "Deidad Mayor (17)",
+    "alignment": "Neutral Bueno (NB)",
+    "clericAlignments": "CB, LB, NB",
+    "portfolio": "Sol, Luz, Curación, Fuerza",
+    "domains": "Bien, Curación, Fuerza, Sol",
+    "favoredWeapon": "Maza de alba / Maza"
+  },
+  {
+    "name": "Saint Cuthbert",
+    "description": "Dios de la retribución honesta, la disciplina y el sentido común. Exige firmeza contra el mal y la necedad.",
+    "divineRank": "Deidad Menor (10)",
+    "alignment": "Legal Neutral (LN)",
+    "clericAlignments": "LN, LB",
+    "portfolio": "Justo Castigo, Sentido comun, sabiduria, Entusiasmo, Honestidad, verdad, disciplina",
+    "domains": "Fuerza, Ley, Protección, Destruccion",
+    "favoredWeapon": "Maza de armas (Báculo pesado)"
+  },
+  {
+    "name": "Tiamat",
+    "description": "Diosa de los dragones cromáticos y conquistadores. Manifestada como un dragón gigantesco de 5 cabezas.",
+    "divineRank": "Deidad Menor (10)",
+    "alignment": "Legal Malvado (LM)",
+    "clericAlignments": "NM, LM",
+    "portfolio": "Dragones Malignos, Conquista.",
+    "domains": "Destruccion, Mal, Ley, supercheria",
+    "favoredWeapon": "Garra"
+  },
+  {
+    "name": "Vecna",
+    "description": "El Mutilado, dios de los secretos prohibidos y la nigromancia. Ex-lich ascendido a la divinidad.",
+    "divineRank": "Deidad Menor (10)",
+    "alignment": "Neutral Malvado (NM)",
+    "clericAlignments": "CM, LM, NM",
+    "portfolio": "Secretos, Intriga",
+    "domains": "Mal, Saber, Magia",
+    "favoredWeapon": "Daga"
+  },
+  {
+    "name": "Wee Jas",
+    "description": "Diosa de la magia arcana y la muerte respetable. Valora la disciplina, las leyes mágicas y la belleza estéticamente perfecta.",
+    "divineRank": "Deidad Intermedia (14)",
+    "alignment": "Legal Neutral (LN)",
+    "clericAlignments": "LN, LB, LM",
+    "portfolio": "Muerte, Magia, Vanidad, Ley",
+    "domains": "Ley, Magia, Muerte",
+    "favoredWeapon": "Daga"
+  },
+  {
+    "name": "Yondalla",
+    "description": "La Bendecida, protectora de la raza de los medianos. Promueve la armonía familiar, la paz y la abundancia agrícola.",
+    "divineRank": "Deidad Mayor (18)",
+    "alignment": "Legal Bueno (LB)",
+    "clericAlignments": "LB, LN, NB",
+    "portfolio": "Medianos, Protección, Familia, Hogar",
+    "domains": "Bien, Ley, Protección",
+    "favoredWeapon": "Espada corta"
+  }
+]
