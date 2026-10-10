@@ -1,6 +1,6 @@
 # Crónicas 3.5
 
-Aplicación Flutter para Android y web con una ficha editable de personaje de D&D 3.5, un compendio local de 66 conjuros importados de `Conjuros_DnD_3.5_Compendio.xlsx`, un selector con las descripciones de los nueve alineamientos de `Alineamientos_DnD_3.5.xlsx` y un selector local de 20 deidades de `Dioses_DnD_3.5.xlsx`. Los datos están empaquetados en `assets/data/spells.json`, `assets/data/alignments.json` y `assets/data/deities.json`; la app no necesita conexión para consultarlos. La ficha se guarda localmente en el dispositivo o en el almacenamiento del navegador.
+Aplicación Flutter para Android y web con una ficha editable de personaje de D&D 3.5, un compendio local de 66 conjuros importados de `Conjuros_DnD_3.5_Compendio.xlsx`, un selector con las descripciones de los nueve alineamientos de `Alineamientos_DnD_3.5.xlsx` y un selector local de 39 deidades de los planos D&D y Olimpo, importadas de `Dioses_DnD_3.5.xlsx` y `Dioses DND Olimpo.xlsx`. Los datos están empaquetados en `assets/data/spells.json`, `assets/data/alignments.json` y `assets/data/deities.json`; la app no necesita conexión para consultarlos. La ficha se guarda localmente en el dispositivo o en el almacenamiento del navegador.
 
 ## Requisitos
 
@@ -96,7 +96,7 @@ Abre `http://localhost:8000`. El contenido de `build/web` también puede publica
 
 - Ficha editable con identidad, seis características, combate, salvaciones, habilidades, dotes, equipo y notas.
 - Selector de alineamiento con categorías, siglas y descripciones locales.
-- Selector de deidades del panteón D&D, identificado con una cápsula visual, con filtro por nombre, ámbito, dominio o alineamiento y consulta de sus descripciones.
+- Selector de deidades de D&D y Olimpo, identificadas con cápsulas visuales, con filtros por plano y texto (nombre, ámbito, dominio o alineamiento) y consulta de sus descripciones.
 - Guardado automático local sin crear cuenta.
 - Compendio integrado con búsqueda por nombre, escuela o clase, filtros por nivel y clase, y consulta de los detalles de cada conjuro.
 - Diseño adaptable a pantallas móviles y de escritorio.

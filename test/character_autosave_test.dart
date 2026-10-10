@@ -67,8 +67,26 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(deityField);
     await tester.pumpAndSettle();
-    expect(find.text('20 de 20 deidades'), findsOneWidget);
+    expect(find.text('39 de 39 deidades'), findsOneWidget);
     expect(find.text('D&D'), findsWidgets);
+
+    final pantheonFilter = find.byWidgetPredicate(
+      (widget) =>
+          widget is DropdownButtonFormField<String> &&
+          widget.decoration.labelText == 'Filtrar por plano',
+    );
+    expect(pantheonFilter, findsOneWidget);
+    await tester.tap(pantheonFilter);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('D&D').last);
+    await tester.pumpAndSettle();
+    expect(find.text('20 de 39 deidades'), findsOneWidget);
+
+    await tester.tap(pantheonFilter);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Olimpo').last);
+    await tester.pumpAndSettle();
+    expect(find.text('19 de 39 deidades'), findsOneWidget);
 
     final deityFilter = find.byWidgetPredicate(
       (widget) =>
@@ -76,17 +94,18 @@ void main() {
           widget.decoration?.labelText ==
               'Filtrar por nombre, ámbito, dominio o alineamiento',
     );
-    await tester.enterText(deityFilter, 'viajes');
+    await tester.enterText(deityFilter, 'Zeus');
     await tester.pump();
-    expect(find.text('1 de 20 deidades'), findsOneWidget);
-    expect(find.text('Fharlanghn'), findsOneWidget);
-    await tester.tap(find.text('Fharlanghn'));
+    expect(find.text('1 de 39 deidades'), findsOneWidget);
+    expect(find.text('Zeus'), findsNWidgets(2));
+    expect(find.text('Olimpo'), findsWidgets);
+    await tester.tap(find.text('Zeus').last);
     await tester.pumpAndSettle();
-    expect(find.text('D&D'), findsOneWidget);
+    expect(find.text('Olimpo'), findsOneWidget);
     expect(find.text('Descripción'), findsOneWidget);
     expect(
       find.text(
-        'El Morador del Horizonte, patrón de los viajeros, mercaderes y exploradores que recorren largas distancias.',
+        'Señor del Olimpo y dios de los cielos y las tormentas. Mantiene la autoridad divina suprema con puño de hierro y rayos destructivos.',
       ),
       findsOneWidget,
     );
@@ -97,12 +116,12 @@ void main() {
     final deityPreferences = await SharedPreferences.getInstance();
     expect(
       deityPreferences.getString('character-sheet-v1'),
-      contains('"deity":"Fharlanghn"'),
+      contains('"deity":"Zeus"'),
     );
 
     await tester.tap(find.byTooltip('Ver descripción de la deidad'));
     await tester.pumpAndSettle();
-    expect(find.text('Báculo de caminante'), findsOneWidget);
+    expect(find.text('Lanza corta / Rayo'), findsOneWidget);
     final deityDetailLabels = tester
         .widgetList<Text>(find.byType(Text))
         .map((text) => text.data)

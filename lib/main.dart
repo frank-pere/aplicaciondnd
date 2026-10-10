@@ -1176,6 +1176,7 @@ class _DeityPickerDialog extends StatefulWidget {
 
 class _DeityPickerDialogState extends State<_DeityPickerDialog> {
   String _query = '';
+  String _pantheon = 'Todos';
 
   List<CharacterDeity> get _filteredDeities {
     final query = _query.trim().toLowerCase();
@@ -1190,7 +1191,8 @@ class _DeityPickerDialogState extends State<_DeityPickerDialog> {
         deity.domains,
         deity.favoredWeapon,
       ].join(' ').toLowerCase();
-      return searchable.contains(query);
+      return searchable.contains(query) &&
+          (_pantheon == 'Todos' || deity.pantheon == _pantheon);
     }).toList(growable: false);
   }
 
@@ -1222,6 +1224,28 @@ class _DeityPickerDialogState extends State<_DeityPickerDialog> {
                       'Filtrar por nombre, ámbito, dominio o alineamiento',
                   prefixIcon: Icon(Icons.search),
                 ),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _pantheon,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  labelText: 'Filtrar por plano',
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                ),
+                items: [
+                  for (final pantheon in ['Todos', 'D&D', 'Olimpo'])
+                    DropdownMenuItem(
+                      value: pantheon,
+                      child: Text(pantheon),
+                    ),
+                ],
+                onChanged: (value) {
+                  if (value != null) setState(() => _pantheon = value);
+                },
               ),
               const SizedBox(height: 12),
               Text(
