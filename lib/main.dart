@@ -1177,6 +1177,28 @@ class _DeityPickerDialog extends StatefulWidget {
 class _DeityPickerDialogState extends State<_DeityPickerDialog> {
   String _query = '';
   String _pantheon = 'Todos';
+  String _clericAlignment = 'Todos';
+  String _domain = 'Todos';
+
+  static const _clericAlignmentOptions = [
+    'LB',
+    'LN',
+    'LM',
+    'NB',
+    'N',
+    'NM',
+    'CB',
+    'CN',
+    'CM',
+  ];
+
+  List<String> get _domainOptions => widget.deities
+      .expand((deity) => deity.domains.split(','))
+      .map((domain) => domain.trim().replaceAll(RegExp(r'\.+$'), ''))
+      .where((domain) => domain.isNotEmpty && domain.toLowerCase() != 'todos')
+      .toSet()
+      .toList()
+    ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
   List<CharacterDeity> get _filteredDeities {
     final query = _query.trim().toLowerCase();
@@ -1191,10 +1213,68 @@ class _DeityPickerDialogState extends State<_DeityPickerDialog> {
         deity.domains,
         deity.favoredWeapon,
       ].join(' ').toLowerCase();
+      final clericAlignmentMatches = _clericAlignment == 'Todos' ||
+          deity.clericAlignments.toLowerCase().contains('todos') ||
+          deity.clericAlignments
+              .split(',')
+              .any((alignment) => alignment.trim() == _clericAlignment);
+      final domains = deity.domains
+          .split(',')
+          .map((domain) => domain.trim().replaceAll(RegExp(r'\.+$'), ''));
+      final domainMatches = _domain == 'Todos' ||
+          deity.domains.toLowerCase().contains('todos') ||
+          domains.any((domain) => domain.toLowerCase() == _domain.toLowerCase());
+
       return searchable.contains(query) &&
-          (_pantheon == 'Todos' || deity.pantheon == _pantheon);
+          (_pantheon == 'Todos' || deity.pantheon == _pantheon) &&
+          clericAlignmentMatches &&
+          domainMatches;
     }).toList(growable: false);
   }
+
+  Widget _clericAlignmentDropdown() => DropdownButtonFormField<String>(
+        initialValue: _clericAlignment,
+        isExpanded: true,
+        decoration: const InputDecoration(
+          labelText: 'Filtrar por alineamiento de clérigos',
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 12,
+          ),
+        ),
+        items: [
+          for (final alignment in ['Todos', ..._clericAlignmentOptions])
+            DropdownMenuItem(
+              value: alignment,
+              child: Text(alignment),
+            ),
+        ],
+        onChanged: (value) {
+          if (value != null) setState(() => _clericAlignment = value);
+        },
+      );
+
+  Widget _domainDropdown() => DropdownButtonFormField<String>(
+        initialValue: _domain,
+        isExpanded: true,
+        decoration: const InputDecoration(
+          labelText: 'Filtrar por dominio',
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 12,
+          ),
+        ),
+        items: [
+          for (final domain in ['Todos', ..._domainOptions])
+            DropdownMenuItem(
+              value: domain,
+              child: Text(domain),
+            ),
+        ],
+        onChanged: (value) {
+          if (value != null) setState(() => _domain = value);
+        },
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -1237,7 +1317,14 @@ class _DeityPickerDialogState extends State<_DeityPickerDialog> {
                   ),
                 ),
                 items: [
-                  for (final pantheon in ['Todos', 'D&D', 'Olimpo'])
+                  for (final pantheon in [
+                    'Todos',
+                    'D&D',
+                    'Olimpo',
+                    'Faraónico',
+                    'Asgardiano',
+                    'Fe del Sol',
+                  ])
                     DropdownMenuItem(
                       value: pantheon,
                       child: Text(pantheon),
@@ -1247,6 +1334,20 @@ class _DeityPickerDialogState extends State<_DeityPickerDialog> {
                   if (value != null) setState(() => _pantheon = value);
                 },
               ),
+              const SizedBox(height: 12),
+              if (screenSize.width > 620)
+                Row(
+                  children: [
+                    Expanded(child: _clericAlignmentDropdown()),
+                    const SizedBox(width: 12),
+                    Expanded(child: _domainDropdown()),
+                  ],
+                )
+              else ...[
+                _clericAlignmentDropdown(),
+                const SizedBox(height: 12),
+                _domainDropdown(),
+              ],
               const SizedBox(height: 12),
               Text(
                 '${deities.length} de ${widget.deities.length} deidades',

@@ -67,7 +67,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(deityField);
     await tester.pumpAndSettle();
-    expect(find.text('39 de 39 deidades'), findsOneWidget);
+    expect(find.text('75 de 75 deidades'), findsOneWidget);
     expect(find.text('D&D'), findsWidgets);
 
     final pantheonFilter = find.byWidgetPredicate(
@@ -80,13 +80,67 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('D&D').last);
     await tester.pumpAndSettle();
-    expect(find.text('20 de 39 deidades'), findsOneWidget);
+    expect(find.text('20 de 75 deidades'), findsOneWidget);
 
     await tester.tap(pantheonFilter);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Olimpo').last);
     await tester.pumpAndSettle();
-    expect(find.text('19 de 39 deidades'), findsOneWidget);
+    expect(find.text('19 de 75 deidades'), findsOneWidget);
+
+    await tester.tap(pantheonFilter);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Faraónico').last);
+    await tester.pumpAndSettle();
+    expect(find.text('15 de 75 deidades'), findsOneWidget);
+
+    await tester.tap(pantheonFilter);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Asgardiano').last);
+    await tester.pumpAndSettle();
+    expect(find.text('20 de 75 deidades'), findsOneWidget);
+
+    await tester.tap(pantheonFilter);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fe del Sol').last);
+    await tester.pumpAndSettle();
+    expect(find.text('1 de 75 deidades'), findsOneWidget);
+    expect(find.text('Taia (Aspecto Creador / Destructor)'), findsOneWidget);
+
+    await tester.tap(pantheonFilter);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Todos').last);
+    await tester.pumpAndSettle();
+
+    final clericAlignmentFilter = find.byWidgetPredicate(
+      (widget) =>
+          widget is DropdownButtonFormField<String> &&
+          widget.decoration.labelText ==
+              'Filtrar por alineamiento de clérigos',
+    );
+    expect(clericAlignmentFilter, findsOneWidget);
+    await tester.tap(clericAlignmentFilter);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('CM').last);
+    await tester.pumpAndSettle();
+    expect(find.text('20 de 75 deidades'), findsOneWidget);
+
+    await tester.tap(clericAlignmentFilter);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Todos').last);
+    await tester.pumpAndSettle();
+
+    final domainFilter = find.byWidgetPredicate(
+      (widget) =>
+          widget is DropdownButtonFormField<String> &&
+          widget.decoration.labelText == 'Filtrar por dominio',
+    );
+    expect(domainFilter, findsOneWidget);
+    await tester.tap(domainFilter);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Agua').last);
+    await tester.pumpAndSettle();
+    expect(find.text('7 de 75 deidades'), findsOneWidget);
 
     final deityFilter = find.byWidgetPredicate(
       (widget) =>
@@ -94,18 +148,29 @@ void main() {
           widget.decoration?.labelText ==
               'Filtrar por nombre, ámbito, dominio o alineamiento',
     );
-    await tester.enterText(deityFilter, 'Zeus');
+    await tester.enterText(deityFilter, 'Taia');
     await tester.pump();
-    expect(find.text('1 de 39 deidades'), findsOneWidget);
-    expect(find.text('Zeus'), findsNWidgets(2));
-    expect(find.text('Olimpo'), findsWidgets);
-    await tester.tap(find.text('Zeus').last);
+    expect(find.text('1 de 75 deidades'), findsOneWidget);
+    await tester.enterText(deityFilter, '');
+    await tester.pump();
+
+    await tester.tap(domainFilter);
     await tester.pumpAndSettle();
-    expect(find.text('Olimpo'), findsOneWidget);
+    await tester.tap(find.text('Todos').last);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(deityFilter, 'Gungnir');
+    await tester.pump();
+    expect(find.text('1 de 75 deidades'), findsOneWidget);
+    expect(find.text('Odín'), findsOneWidget);
+    expect(find.text('Asgardiano'), findsWidgets);
+    await tester.tap(find.text('Odín'));
+    await tester.pumpAndSettle();
+    expect(find.text('Asgardiano'), findsOneWidget);
     expect(find.text('Descripción'), findsOneWidget);
     expect(
       find.text(
-        'Señor del Olimpo y dios de los cielos y las tormentas. Mantiene la autoridad divina suprema con puño de hierro y rayos destructivos.',
+        'Padre de Todos y rey de Asgard. Sacrificó su ojo por la sabiduría divina y descubrió los secretos del poder de las runas.',
       ),
       findsOneWidget,
     );
@@ -116,12 +181,12 @@ void main() {
     final deityPreferences = await SharedPreferences.getInstance();
     expect(
       deityPreferences.getString('character-sheet-v1'),
-      contains('"deity":"Zeus"'),
+      contains('"deity":"Odín"'),
     );
 
     await tester.tap(find.byTooltip('Ver descripción de la deidad'));
     await tester.pumpAndSettle();
-    expect(find.text('Lanza corta / Rayo'), findsOneWidget);
+    expect(find.text('Gungnir (Lanza)'), findsOneWidget);
     final deityDetailLabels = tester
         .widgetList<Text>(find.byType(Text))
         .map((text) => text.data)
