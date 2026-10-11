@@ -784,6 +784,33 @@ class _CharacterScreenState extends State<_CharacterScreen> {
         'El modificador se calcula con (puntuación − 10) ÷ 2, redondeado hacia abajo. El temporal está pendiente.',
         style: TextStyle(color: _muted, fontSize: 12),
       ),
+      const SizedBox(height: 16),
+      const Row(
+        children: [
+          Icon(Icons.shield_outlined, color: _gold, size: 20),
+          SizedBox(width: 9),
+          Text(
+            'TIROS DE SALVACIÓN',
+            style: TextStyle(
+              color: _gold,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.25,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 18),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final key in ['fortitude', 'reflex', 'will'])
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _field(key),
+            ),
+        ],
+      ),
     ]);
     final combatSection =
         _section('Combate y defensas', Icons.shield_outlined, [
@@ -796,9 +823,6 @@ class _CharacterScreenState extends State<_CharacterScreen> {
         _field('flatFooted'),
         _field('baseAttack'),
         _field('grapple'),
-        _field('fortitude'),
-        _field('reflex'),
-        _field('will'),
       ]),
     ]);
     final content = [
